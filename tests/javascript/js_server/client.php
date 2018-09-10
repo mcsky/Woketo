@@ -4,7 +4,7 @@ require __DIR__ . '/../../../vendor/autoload.php';
 
 use Nekland\Woketo\Core\AbstractConnection;
 
-$client = new \Nekland\Woketo\Client\WebSocketClient( 'ws://127.0.0.1:8080/', ['prod' => false]);
+$client = new \Nekland\Woketo\Client\WebSocketClient( 'ws://127.0.0.1:9001/', ['prod' => false]);
 
 $client->start(new class implements \Nekland\Woketo\Message\MessageHandlerInterface {
     public function onConnection(AbstractConnection $connection)
@@ -27,5 +27,10 @@ $client->start(new class implements \Nekland\Woketo\Message\MessageHandlerInterf
     {
         var_dump($e->getMessage());
         echo $e->getTraceAsString();
+    }
+
+    public function onDisconnect(AbstractConnection $connection, \Exception $exception = null)
+    {
+
     }
 });

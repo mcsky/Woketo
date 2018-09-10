@@ -52,7 +52,7 @@ class WebSocketServer
     private $messageHandlers;
 
     /**
-     * @var array
+     * @var Connection[]
      */
     private $connections;
 
@@ -162,8 +162,31 @@ class WebSocketServer
             return $this->getMessageHandler($uri, $connection);
         }, $this->loop, $this->messageProcessor);
 
+        $socketStream->on('end', function () use($connection) {
+            $this->onDisconnect($connection);
+        });
+
         $connection->setLogger($this->getLogger());
         $this->connections[] = $connection;
+    }
+
+    private function onDisconnect(Connection $connection)
+    {
+        $connection->disconnect();
+        $this->removeConnection($connection);
+    }
+
+    private function removeConnection(Connection $connection)
+    {
+        $connectionId = spl_object_id($connection);
+        foreach ($this->connections as $index => $connectionIt) {
+            if ($connectionId === spl_object_id($connectionIt)) {
+                unset($this->connections[$index]);
+                return;
+            }
+        }
+
+        $this->logger->warning(sprintf('Impossible to find the connection with id "%d" in the running server.', $connectionId));
     }
 
     /**
